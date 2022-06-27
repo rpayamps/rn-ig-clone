@@ -1,4 +1,4 @@
-import { View, Text, Pressable, TouchableOpacity, TextInput, StyleSheet } from 'react-native'
+import { View, Text, Pressable, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native'
 import React from 'react'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
@@ -12,6 +12,15 @@ const SignupForm = ({navigation}) => {
             .required()
             .min(6, 'Your password has to be at least 6 characters')
     })
+
+    const onSignup = async (email, password) => {
+        try{
+
+        } catch(error){
+            Alert.alert(' My Lord ....', error.message)
+        }
+    }
+    
     return (
         <View style={styles.wrapper}>
     

@@ -1,37 +1,56 @@
-import { View, TextInput, TouchableOpacity, StyleSheet, Pressable, Text } from 'react-native'
-import {React, useState} from 'react'
+import { View, TextInput, TouchableOpacity, StyleSheet, Pressable, Text, Alert } from 'react-native'
+import {React} from 'react'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 import Validator from 'email-validator'
-
+import firebase from '../../firebase'
 
 const LoginForm = ({navigation}) => {
     const LoginFormSchema = Yup.object().shape({
         email: Yup.string().email().required('An email is required'),
         password: Yup.string()
         .required()
-        .min(6, 'Your password has to have at least 8 characters')
+        .min(6, 'Your password has to have at least 6 characters')
     })
+
+    const onLogin =  async (email, password) => {
+        try {
+            await firebase.auth().signInWithEmailAndPassword(email, password)
+            console.log("Firebase Login Succesful", email, password)
+        } catch(error) {
+            Alert.alert(
+                error.message + '\n\n ... What would you like to do next?'
+                [
+                    {
+                        text: 'OK',
+                        onPress: () => console.log('OK'),
+                        style: 'cancel'
+                    },
+                    { text: 'Sign Up', onPress: () => navigation.push('SignupScreen')}
+                ]
+            ) 
+        }
+    }
 
   return (
     <View style={styles.wrapper}>
 
         <Formik
-            intialValues={{email: '', password: ''}}
-            onSumbit={(values) => {
-                console.log(values)
+            initialValues={{email: '', password: ''}}
+            onSumbit={values => {
+               onLogin(values.email, values.password)
             }}
             validationSchema={LoginFormSchema}
             validateOnMount={true}
         >
-                {({handleChange, handleBlur, handleSumbit, values, isValid}) => (
+        {({handleChange, handleBlur, handleSumbit, values, isValid}) => (
              <>
                 <View 
-                    styles={[
+                    style={[
                         styles.inputField,
                             {
                                 borderColor: 
-                                     values.email.length < 1 || Validator.validate(values)
+                                     values.email.length < 1 || Validator.validate(values.email)
                                         ? '#ccc'
                                         : 'red',
                             },
@@ -55,9 +74,9 @@ const LoginForm = ({navigation}) => {
                     styles.inputField,
                     {
                         borderColor:
-                         1 > values.password.length || values.paddword.length > 6
+                         1 > values.password.length || values.password.length > 5
                             ? '#ccc'
-                             : 'red',
+                            : 'red',
                     }
                 ]}>
                         <TextInput 
@@ -79,8 +98,16 @@ const LoginForm = ({navigation}) => {
                 </View>
 
                 <Pressable 
-                    titleSize={20} 
-                    style={styles.button(isValid)} 
+                    titleSize={20}
+                    // style={( isValid ) => (
+                    //     {
+                    //         backgroundColor: isValid ? '#0096F6' : '#9ACAF7',
+                    //         alignItems: 'center',
+                    //         justifyContent: 'center',
+                    //         minHeight: 42,
+                    //         borderRadius: 4,
+                    //     })}
+                    style={styles.button(isValid)}
                     onPress={handleSumbit}
                     disabled={!isValid}
                 >
@@ -96,12 +123,13 @@ const LoginForm = ({navigation}) => {
                     </View>
             </>
              )}
-            </Formik>
+        </Formik>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+
     wrapper: {
         marginTop: 80,
     },
@@ -114,13 +142,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
 
-    button: isValid => ({
-        backgroundColor: isValid ? '#0096F6': '#9ACAF7',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 42,
-        borderRadius: 4,
-    }),
 
     buttonText: {
         fontWeight: '600',
@@ -134,6 +155,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginTop: 50,
     },
+    button: isValid => ({
+        backgroundColor: isValid ? '#0096F6': '#9ACAF7',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 42,
+        borderRadius: 4,
+    }),
 })
 
 export default LoginForm
