@@ -1,22 +1,18 @@
 import { View, TextInput, TouchableOpacity, StyleSheet, Pressable, Text, Alert } from 'react-native'
-import {React} from 'react'
+import { React } from 'react'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 import Validator from 'email-validator'
-import firebase from '../../firebase'
+import { firebase } from '../../firebase'
+
+
 
 const LoginForm = ({navigation}) => {
-    const LoginFormSchema = Yup.object().shape({
-        email: Yup.string().email().required('An email is required'),
-        password: Yup.string()
-        .required()
-        .min(6, 'Your password has to have at least 6 characters')
-    })
 
-    const onLogin =  async (email, password) => {
+    const onLogin = async (email, password) => {
         try {
             await firebase.auth().signInWithEmailAndPassword(email, password)
-            console.log("Firebase Login Succesful", email, password)
+            console.log("Firebase Login Successful", email, password)
         } catch(error) {
             Alert.alert(
                 error.message + '\n\n ... What would you like to do next?'
@@ -26,24 +22,41 @@ const LoginForm = ({navigation}) => {
                         onPress: () => console.log('OK'),
                         style: 'cancel'
                     },
-                    { text: 'Sign Up', onPress: () => navigation.push('SignupScreen')}
+                    { 
+                        text: 'Sign Up', 
+                        onPress: () => navigation.push('SignupScreen')
+                    }
                 ]
             ) 
         }
     }
+    
+    const button = (isValid) => (
+        {
+       backgroundColor: isValid,
+       alignItems: 'center',
+       justifyContent: 'center',
+       minHeight: 42,
+       borderRadius: 4,
+   })
+
+   const LoginFormSchema = Yup.object().shape({
+    email: Yup.string().email().required('An email is required'),
+    password: Yup.string().required().min(6, 'Your password has to have at least 6 characters')
+   })
 
   return (
     <View style={styles.wrapper}>
-
         <Formik
             initialValues={{email: '', password: ''}}
-            onSumbit={values => {
+            onSubmit={values => {
                onLogin(values.email, values.password)
+               console.log(values)
             }}
             validationSchema={LoginFormSchema}
             validateOnMount={true}
         >
-        {({handleChange, handleBlur, handleSumbit, values, isValid}) => (
+        {({handleChange, handleBlur, handleSubmit, values, isValid}) => (
              <>
                 <View 
                     style={[
@@ -99,16 +112,8 @@ const LoginForm = ({navigation}) => {
 
                 <Pressable 
                     titleSize={20}
-                    // style={( isValid ) => (
-                    //     {
-                    //         backgroundColor: isValid ? '#0096F6' : '#9ACAF7',
-                    //         alignItems: 'center',
-                    //         justifyContent: 'center',
-                    //         minHeight: 42,
-                    //         borderRadius: 4,
-                    //     })}
-                    style={styles.button(isValid)}
-                    onPress={handleSumbit}
+                    style={button(isValid ? '#0096F6' : '#9ACAF7')}
+                    onPress={handleSubmit}
                     disabled={!isValid}
                 >
                     <Text style={styles.buttonText}>Log In</Text>
@@ -117,7 +122,7 @@ const LoginForm = ({navigation}) => {
 
                     <View style={styles.signupContainer}>
                         <Text>Don't have an account?</Text>
-                        <TouchableOpacity onPress={() => navigation.push('SignUpScreen')}>
+                        <TouchableOpacity onPress={() => navigation.push('SignupScreen')}>
                                 <Text style={{ color: '#6BB0F5' }}>Sign Up</Text>
                         </TouchableOpacity>
                     </View>
@@ -142,7 +147,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
 
-
     buttonText: {
         fontWeight: '600',
         color: '#fff',
@@ -155,13 +159,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginTop: 50,
     },
-    button: isValid => ({
-        backgroundColor: isValid ? '#0096F6': '#9ACAF7',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 42,
-        borderRadius: 4,
-    }),
+
 })
+
+
+
+
 
 export default LoginForm

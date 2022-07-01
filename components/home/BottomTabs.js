@@ -38,15 +38,23 @@ export const bottomTabIcons = [
 const BottomTabs = ({icons}) => {
     const [activeTab, setActiveTab] = useState('Home')
 
+    const profilePic = (activeTab = '') => ( 
+      {
+      borderRadius: 50,
+      borderWidth: activeTab === 'Profile' ? 2 : 0,
+      borderColor: '#fff',
+      }
+    )
+
     const Icon = ({icon}) => (
         <TouchableOpacity onPress={() => setActiveTab(icon.name)}>
             <Image 
               source={{uri: activeTab === icon.name ? icon.active : icon.inactive}} 
               style={[
                   styles.icon, 
-                  icon.name === 'Profile' ? styles.profilePic() : null,
+                  icon.name === 'Profile' ? profilePic() : null,
                   activeTab === 'Profile' && icon.name === activeTab ? 
-                    styles.profilePic(activeTab) 
+                    profilePic(activeTab) 
                     : null,
               ]}
             />
@@ -83,11 +91,7 @@ const styles = StyleSheet.create({
         width:30,
         height:30,
     },
-    profilePic: (activeTab = '') =>({
-      borderRadius: 50,
-      borderWidth: activeTab === 'Profile' ? 2 : 0,
-      borderColor: '#fff',
-    })
+
 })
 
 export default BottomTabs
